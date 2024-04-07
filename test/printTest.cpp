@@ -1,8 +1,21 @@
 #include <list>
 #include <map>
+#include <string_view>
 #include <vector>
 
 #include "printer.h"
+
+struct Person {
+    int              age;
+    char             sex;
+    std::string_view name;
+
+    [[nodiscard]] std::string toString() const {
+        std::stringstream ss;
+        ss << "[" << name << ", " << age << ", " << (sex == 'm' ? "male" : "female") << "]";
+        return ss.str();
+    }
+};
 
 int main() {
     std::vector<std::vector<int>>   vc{{1, 2}, {3, 4}};
@@ -18,6 +31,8 @@ int main() {
     LINE_BREAKER("printer test");
     OUT(toString(vc));
     print(mp);
+    Person person{18, 'm', "shuaikai"};
+    OUT(toString(person));
     dump(toString(vc), toString(mp));
 
     LINE_BREAKER("logger test");
