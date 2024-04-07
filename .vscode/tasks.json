@@ -1,0 +1,25 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "BuildActiveCppFile",
+            "command": "/usr/bin/clang++",
+            "args": [
+                "-std=c++20",
+                "-g",
+                "${file}",
+                "-I${workspaceFolder}/include",
+                "-o",
+                "${workspaceFolder}/build/bin/${fileBasenameNoExtension}"
+            ],
+            "options": {
+                "cwd": "/usr/bin"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": "build"
+        }
+    ]
+}

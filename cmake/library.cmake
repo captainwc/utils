@@ -1,0 +1,5 @@
+# if (${SYSTEM} STREQUAL "unix")
+#     find_library(LIB_GTEST gtest REQUIRED)
+#     find_library(LIB_PTHREAD pthread REQUIRED)
+#     find_library(LIB_REDIS hiredis REQUIRED)
+# endif ()
