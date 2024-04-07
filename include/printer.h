@@ -7,7 +7,7 @@
  * @usage:
  *      打印：
  *        - 对于常见类型（基本类型、STL container、重载了 << 操作符的类型，以及他们的嵌套，可以直接 print 和 toString
- *        - 对于自定义类型，需要实现一个 toString 函数，或者重载 << 操作符
+ *        - 对于自定义类型，需要实现一个 toString 函数（返回值为任意可转化为string_view的类型），或者重载 << 操作符
  *        - print(obj) 直接打印
  *        - dump(...) 连续打印
  *        - OUT(obj) 打印 [#obj]: obj的形式
@@ -64,7 +64,7 @@ concept StreamOutable = requires(std::ostream& os, T elem) {
 };
 template <typename T>
 concept Serializable = requires(T obj) {
-    { obj.toString() } -> std::convertible_to<std::string>;
+    { obj.toString() } -> std::convertible_to<std::string_view>;
 };
 template <typename T>
 concept SequentialContainer = requires(T c) {
