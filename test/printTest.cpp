@@ -3,7 +3,12 @@
 #include <string_view>
 #include <vector>
 
+#include "logger.h"
+#include "macro.h"
 #include "printer.h"
+
+using namespace sk::printer;
+using namespace sk::logger;
 
 struct Person {
     int              age;
@@ -29,10 +34,10 @@ int main() {
     ASSERT_ALL_PASSED();
 
     LINE_BREAKER("printer test");
-    OUT(toString(vc));
+    COUT(toString(vc));
     print(mp);
     Person person{18, 'm', "shuaikai"};
-    OUT(toString(person));
+    COUT(toString(person));
     dump(toString(vc), toString(mp));
 
     LINE_BREAKER("logger test");

@@ -1,3 +1,6 @@
-file(GLOB SOURCES "*.cpp")
+add_executable(printTest printTest.cpp)
+target_include_directories(printTest PUBLIC ${INCLUDE_DIR})
 
-add_targets("Tests" ${SOURCES})
+add_executable(graphicTest graphicTest.cpp)
+target_include_directories(graphicTest PUBLIC ${INCLUDE_DIR})
+target_link_libraries(graphicTest mygraphic)

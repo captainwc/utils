@@ -1,5 +1,5 @@
-#ifndef SHUAIKAI_PRINTER_H
-#define SHUAIKAI_PRINTER_H
+#ifndef SK_UTILS_PRINTER_H
+#define SK_UTILS_PRINTER_H
 
 /**
  * @file printer.h
@@ -24,39 +24,16 @@
  *        - TODO() 输出需要补全代码的位置信息
  * @copyright Copyright (c) shuaikai 2024
  */
+static_assert(__cplusplus >= 202002L, "To use this file, your cpp version must >= CXX20");
 
 #include <iostream>
 #include <sstream>
 
-static_assert(__cplusplus >= 202002L, "To use this file, your cpp version must >= CXX20");
-
-/// MARK: Useful Mcro
-
-#define ANSI_CLEAR     "\033[0m"
-#define ANSI_RED_BG    "\033[0;31m"
-#define ANSI_GREEN_BG  "\033[0;32m"
-#define ANSI_YELLOW_BG "\033[0;33m"
-#define ANSI_BLUE_BG   "\033[0;34m"
-#define ANSI_PURPLE_BG "\033[0;35m"
-
-#define COUT_POSITION_ "[" << __FILE__ << ", " << __FUNCTION__ << ", " << __LINE__ << "]"
-
-#define TODO()                                                                                                   \
-    do {                                                                                                         \
-        std::cerr << ANSI_YELLOW_BG << "Fill Code Here!!! -> " << ANSI_PURPLE_BG << COUT_POSITION_ << ANSI_CLEAR \
-                  << std::endl;                                                                                  \
-    } while (0);
-
-#define OUT(x) std::cout << ANSI_BLUE_BG << "[" #x "]: " << ANSI_CLEAR << toString(x) << std::endl;
-
-#define LINE_BREAKER(msg) \
-    std::cout << ANSI_YELLOW_BG << "========== " << (msg) << " ==========" << ANSI_CLEAR << std::endl
-#define NEW_LINE() std::cout << std::endl
-
-// 使用exit他说我线程不安全
-#define THREAD_SAFE_EXIT(x) std::quick_exit(x)
+#include "macro.h"
 
 /// MARK: Concepts
+
+namespace sk::printer {
 
 template <typename T>
 concept StreamOutable = requires(std::ostream& os, T elem) {
@@ -192,104 +169,6 @@ void dump(Args... args) {
     std::cout << "\n";
 }
 
-/// MARK:  Test util
+}  // namespace sk::printer
 
-#include <atomic>
-#include <cassert>
-
-std::atomic<int> gFailedTest(0);  // NOLINT
-std::atomic<int> gTotalTest(0);   // NOLINT
-
-#define ASSERT_MSG(expr, msg)                                             \
-    do {                                                                  \
-        if (!(expr)) {                                                    \
-            std::cerr << ANSI_RED_BG << (msg) << ANSI_CLEAR << std::endl; \
-            THREAD_SAFE_EXIT(-1);                                         \
-        }                                                                 \
-    } while (0)
-
-#define ASSERT(expr)                                                                                      \
-    do {                                                                                                  \
-        if (!(expr)) {                                                                                    \
-            std::cerr << ANSI_RED_BG << "Assert " << ANSI_PURPLE_BG << #expr << ANSI_RED_BG << " Failed!" \
-                      << ANSI_CLEAR << std::endl;                                                         \
-            THREAD_SAFE_EXIT(-1);                                                                         \
-        }                                                                                                 \
-    } while (0)
-
-/// x: expected, y: acutal
-#define STR_EQUAL_(x, y)                                                                                              \
-    do {                                                                                                              \
-        auto expected = toString(x);                                                                                  \
-        auto actual   = toString(y);                                                                                  \
-        if (expected == actual) {                                                                                     \
-            std::cout << ANSI_GREEN_BG << "[PASSED] " << ANSI_CLEAR << "[" + std::to_string(gTotalTest.load()) + "] " \
-                      << ANSI_BLUE_BG << #x "==" #y << ANSI_CLEAR << std::endl;                                       \
-        } else {                                                                                                      \
-            ++gFailedTest;                                                                                            \
-            std::cerr << ANSI_RED_BG << "[FAILED] " << ANSI_CLEAR << "[" + std::to_string(gTotalTest.load()) + "] "   \
-                      << ANSI_BLUE_BG << #x "==" #y ": " << ANSI_YELLOW_BG << COUT_POSITION_ << ANSI_CLEAR            \
-                      << std::endl;                                                                                   \
-            std::cerr << ANSI_PURPLE_BG << '\t' << "Expected: " << ANSI_CLEAR << expected << std::endl;               \
-            std::cerr << ANSI_PURPLE_BG << '\t' << "  Actual: " << ANSI_CLEAR << actual << std::endl;                 \
-        }                                                                                                             \
-        ++gTotalTest;                                                                                                 \
-    } while (0)
-
-//? 这里包装只是为了加上 NOLINT 而已。因为没懂为什么clang-tidy会告警：Do not implicitly decay an array into a pointer
-#define ASSERT_STR_EQUAL(x, y) STR_EQUAL_((x), (y))  // NOLINT
-
-#define ASSERT_ALL_PASSED()                                                                           \
-    do {                                                                                              \
-        std::cout << std::endl;                                                                       \
-        if (gFailedTest.load() == 0) {                                                                \
-            std::cout << ANSI_GREEN_BG << "==== "                                                     \
-                      << std::to_string(gTotalTest.load()) + "/" + std::to_string(gTotalTest.load())  \
-                             + " PASSED ALL! ===="                                                    \
-                      << ANSI_CLEAR << std::endl;                                                     \
-        } else {                                                                                      \
-            std::cout << ANSI_RED_BG << "==== "                                                       \
-                      << std::to_string(gFailedTest.load()) + "/" + std::to_string(gTotalTest.load()) \
-                             + " test failed! ===="                                                   \
-                      << ANSI_CLEAR << std::endl;                                                     \
-        }                                                                                             \
-    } while (0)
-
-/// MARK: Logger
-
-#define LOG(...) LOG_(__VA_ARGS__)  // NOLINT
-#define LOG_(...)                                                          \
-    do {                                                                   \
-        std::cout << ANSI_BLUE_BG << COUT_POSITION_ << ": " << ANSI_CLEAR; \
-        log(__VA_ARGS__);                                                  \
-    } while (0)
-
-int constexpr countSubStr(std::string_view str, std::string_view substr) {
-    int    cnt       = 0;
-    size_t pos       = 0;
-    auto   sublength = substr.length();
-    while ((pos = str.find(substr, pos)) != std::string::npos) {
-        cnt++;
-        pos += sublength;
-    }
-    return cnt;
-}
-
-template <typename... Args>
-std::string formatStr(std::string_view format, const Args&... args) {
-    int placeholdersCount = countSubStr(format, "{}");
-    ASSERT_MSG(placeholdersCount == sizeof...(args),
-               "Failed to call LOG, because num of {} must equal to args you passed! "
-                   + formatStr("Expected {} args, and got {}.", placeholdersCount, sizeof...(args)));
-    std::string logMsg(format);
-    size_t      argIndex = 0;
-    ((logMsg.replace(logMsg.find("{}"), 2, toString(args)), ++argIndex), ...);
-    return logMsg;
-}
-
-template <typename... Args>
-void log(std::string_view format, const Args&... args) {
-    std::cout << formatStr(format, args...) << std::endl;
-}
-
-#endif  // SHUAIKAI_PRINTER_H
+#endif  // SK_UTILS_PRINTER_H
