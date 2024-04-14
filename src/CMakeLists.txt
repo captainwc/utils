@@ -1,2 +1,10 @@
 add_library(mygraphic STATIC graphic.cpp)
 target_include_directories(mygraphic PUBLIC ${INCLUDE_DIR})
+
+if(UNIX)
+    find_package(Curses REQUIRED)
+    if(CURSES_FOUND)
+        target_link_libraries(mygraphic PUBLIC ${CURSES_LIBRARIES})
+        target_include_directories(mygraphic PUBLIC ${CURSES_INCLUDE_DIRS})
+    endif()
+endif()

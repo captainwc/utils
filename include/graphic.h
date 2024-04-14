@@ -44,11 +44,12 @@ private:
     Frame_t currImg_;
     Frame_t nextImg_;
     int     fps_;
+    char    default_char_;
 
     void sleep() const;
 
 public:
-    explicit Frame(Shape_t shape, int fps = 60);
+    explicit Frame(Shape_t shape, int fps = 60, char default_char = ' ');
     ~Frame();
     void show() const;
     void refresh(Frame_t newFrame);

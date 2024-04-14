@@ -7,13 +7,13 @@
 #include "macro.h"
 #include "printer.h"
 
-using namespace sk::printer;
-using namespace sk::logger;
+using namespace sk::printer;  // NOLINT
+using namespace sk::logger;   // NOLINT
 
 struct Person {
-    int              age;
-    char             sex;
-    std::string_view name;
+    int              age;   // NOLINT
+    char             sex;   // NOLINT
+    std::string_view name;  // NOLINT
 
     [[nodiscard]] std::string toString() const {
         std::stringstream ss;

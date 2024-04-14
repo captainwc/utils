@@ -1,5 +1,11 @@
-build/*
-.cache/*
 .idea/*
+.cache/*
 
 example/*
+build/*
+
+*.out
+*.exe
+*.a
+*.dll
+*.so

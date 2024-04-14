@@ -2,8 +2,9 @@
 #define SK_UTILS_MACRO_H
 
 // ERRNO
-#define EXIT_ASSERT_FAIL    900
-#define EXIT_PARAM_ILLEGAL  901
+#define EXIT_ASSERT_FAIL   900
+#define EXIT_PARAM_ILLEGAL 901
+#define EXIT_CTRL_C        902
 
 #define THREAD_SAFE_EXIT(x) exit(x)
 

@@ -3,13 +3,17 @@
 #include <atomic>
 #include <iostream>
 #include <thread>
+#include <utility>
+
+#include "macro.h"
+#include "printer.h"
 
 namespace sk::graphic::terminal {
 struct GlobalCtx {
-    static std::atomic_int16_t maxRowPos;
+    static std::atomic_int16_t maxRowPos;  // NOLINT
 };
 
-std::atomic_int16_t GlobalCtx::maxRowPos(0);
+std::atomic_int16_t GlobalCtx::maxRowPos(0);  // NOLINT
 
 #ifdef _WIN32
 #include <windows.h>
@@ -21,6 +25,16 @@ void setCursorPos(Const_Pos_t pos) {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     COORD  position = {static_cast<SHORT>(pos.y), static_cast<SHORT>(pos.x)};
     SetConsoleCursorPosition(hConsole, position);
+}
+
+void printCharAtPos(Const_Pos_t pos, char c) {
+    sk::graphic::terminal::setCursorPos(pos);
+    putchar(c);
+}
+
+void printStringAtPos(Const_Pos_t pos, const std::string_view &str) {
+    sk::graphic::terminal::setCursorPos(pos);
+    std::cout << str;
 }
 
 void clearScreen() {
@@ -62,17 +76,31 @@ void registerCtrlC() {
 }
 
 #else
+#include "curses.h"
+
 void setCursorPos(Const_Pos_t pos) {
-    TODO("Missing Linux Version Function setCursorPos(Pos)");
+    move(pos.x, pos.y);
+}
+
+void printCharAtPos(Const_Pos_t pos, char c) {
+    sk::graphic::terminal::setCursorPos(pos);
+    printw("%c", c);  // NOLINT
+    refresh();
+}
+
+void printStringAtPos(Const_Pos_t pos, const std::string_view &str) {
+    sk::graphic::terminal::setCursorPos(pos);
+    printw("%s", str.data());  // NOLINT
+    refresh();
 }
 
 void clearScreen() {
-    TODO("Missing Linux Version Function clearScreen()");
+    clear();
+    refresh();
 }
 
 void registerCtrlC() {
-    TODO("Missing Linux Version Function registerCtrlC()");
-    exit(-1);
+    // Ctrl-C is not trapped in Linux, because curses will auto reset cursor position when press ctrl-c.
 }
 #endif
 
@@ -80,22 +108,12 @@ void resetCursorPos(int skippedLine) {
     sk::graphic::terminal::setCursorPos({GlobalCtx::maxRowPos.load() + skippedLine + 1, 0});
 }
 
-void printCharAtPos(Const_Pos_t pos, char c) {
-    sk::graphic::terminal::setCursorPos(pos);
-    putchar(c);
-}
-
-void printStringAtPos(Const_Pos_t pos, const std::string_view &str) {
-    sk::graphic::terminal::setCursorPos(pos);
-    std::cout << str;
-}
-
 Pos_t calPosition(Const_Shape_t shape, int x) {
     return {x / shape.column, x % shape.column};
 }
 
 Frame_t makeFrame(Const_Shape_t shape, char c) {
-    return Frame_t(shape.row, Frame_Row_t(shape.column, c));
+    return Frame_t(shape.row, Frame_Row_t(shape.column, c));  // NOLINT
 }
 
 Frame_t makeFrame(Const_Shape_t shape, std::string_view str) {
@@ -111,16 +129,23 @@ Frame_t makeFrame(Const_Shape_t shape, std::string_view str) {
     return ret;
 }
 
-Frame::Frame(Shape_t shape, int fps) : shape_(shape), fps_(fps) {
+Frame::Frame(Shape_t shape, int fps, char default_char) : shape_(shape), fps_(fps), default_char_(default_char) {
+#ifndef _WIN32
+    initscr();
+    curs_set(0);
+#endif
     sk::graphic::terminal::registerCtrlC();
-    currImg_ = makeFrame(' ');
-    nextImg_ = makeFrame(' ');
+    currImg_ = makeFrame(default_char_);
+    nextImg_ = makeFrame(default_char_);
     sk::graphic::terminal::clearScreen();
     this->show();
 }
 
 Frame::~Frame() {
     resetCursorPos();
+#ifndef _WIN32
+    endwin();
+#endif
 }
 
 Frame_t Frame::makeFrame(char c) const {
@@ -149,7 +174,7 @@ void Frame::show() const {
 
 void Frame::refresh(Frame_t newFrame) {
     currImg_ = nextImg_;
-    nextImg_ = newFrame;
+    nextImg_ = std::move(newFrame);
     show();
 }
 

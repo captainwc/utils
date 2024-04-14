@@ -64,8 +64,6 @@ concept PairLike = requires(T p) {
 template <typename T>
 concept Printable = StreamOutable<T> || Serializable<T> || SequentialContainer<T> || MappedContainer<T> || PairLike<T>;
 
-/// MARK: 前向声明
-
 template <bool>
 auto toString(bool obj);
 
