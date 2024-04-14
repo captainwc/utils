@@ -1,6 +1,8 @@
 #ifndef SK_UTILS_MACRO_H
 #define SK_UTILS_MACRO_H
 
+#include <iostream>
+
 // ERRNO
 #define EXIT_ASSERT_FAIL   900
 #define EXIT_PARAM_ILLEGAL 901
@@ -26,9 +28,7 @@
         std::cerr << ANSI_YELLOW_BG << msg << ANSI_PURPLE_BG << COUT_POSITION << ANSI_CLEAR << std::endl; \
     } while (0);
 
-#define FILL_ME()                 \
-    TODO("Fill Code Here!!! -> ") \
-    }
+#define FILL_ME() TODO("Fill Code Here!!! -> ")
 
 #define LINE_BREAKER(msg) \
     std::cout << ANSI_YELLOW_BG << "========== " << (msg) << " ==========" << ANSI_CLEAR << std::endl
