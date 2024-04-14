@@ -16,14 +16,17 @@ struct Shape {
     int column;
 };
 
-using Pos_t         = Position;
-using Shape_t       = Shape;
-using Frame_Row_t   = std::vector<char>;
-using Frame_t       = std::vector<Frame_Row_t>;
-using Digit_Frame_t = std::vector<std::vector<int>>;
+using Pos_t               = Position;
+using Shape_t             = Shape;
+using Default_Frame_Row_t = std::vector<char>;
+using Frame_t             = std::vector<Default_Frame_Row_t>;
+using Str_Frame_t         = std::vector<std::string_view>;
+using Digit_Frame_t       = std::vector<std::vector<int>>;
 
 using Const_Pos_t         = const Pos_t &;
 using Const_Shape_t       = const Shape_t &;
+using Const_Frame_t       = const Frame_t &;
+using Const_Str_Frame_t   = const Str_Frame_t &;
 using Const_Digit_Frame_t = const Digit_Frame_t &;
 
 void setCursorPos(Const_Pos_t pos);
@@ -37,19 +40,20 @@ void registerCtrlC();
 Frame_t makeFrame(Const_Shape_t shape, char c);
 Frame_t makeFrame(Const_Shape_t shape, std::string_view str);
 Frame_t makeFrame(Const_Digit_Frame_t digit_frame);
+Frame_t makeFrame(Const_Shape_t shape, const std::vector<std::string_view> &frame);
 
 class Frame {
 private:
     Shape_t shape_;
     Frame_t currImg_;
     Frame_t nextImg_;
-    int     fps_;
+    double  fps_;
     char    default_char_;
 
     void sleep() const;
 
 public:
-    explicit Frame(Shape_t shape, int fps = 60, char default_char = ' ');
+    explicit Frame(Shape_t shape, double fps = 60, char default_char = ' ');
     ~Frame();
     void show() const;
     void refresh(Frame_t newFrame);
@@ -57,6 +61,7 @@ public:
     [[nodiscard]] Const_Shape_t shape() const;
 
     [[nodiscard]] Frame_t makeFrame(char c) const;
+    [[nodiscard]] Frame_t makeFrame(Const_Str_Frame_t frame) const;
     [[nodiscard]] Frame_t makeFrame(std::string_view str) const;
     [[nodiscard]] Frame_t makeFrame(Const_Digit_Frame_t digit_frame) const;
 };

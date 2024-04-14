@@ -113,7 +113,7 @@ Pos_t calPosition(Const_Shape_t shape, int x) {
 }
 
 Frame_t makeFrame(Const_Shape_t shape, char c) {
-    return Frame_t(shape.row, Frame_Row_t(shape.column, c));  // NOLINT
+    return Frame_t(shape.row, Default_Frame_Row_t(shape.column, c));  // NOLINT
 }
 
 Frame_t makeFrame(Const_Shape_t shape, std::string_view str) {
@@ -129,7 +129,18 @@ Frame_t makeFrame(Const_Shape_t shape, std::string_view str) {
     return ret;
 }
 
-Frame::Frame(Shape_t shape, int fps, char default_char) : shape_(shape), fps_(fps), default_char_(default_char) {
+Frame_t makeFrame(Const_Shape_t shape, Const_Str_Frame_t frame) {
+    ASSERT_MSG(!frame.empty() && frame.size() <= shape.row && frame[0].size() <= shape.column, "The shape is illegal.");
+    Frame_t ret_frame = sk::graphic::terminal::makeFrame(shape, ' ');
+    for (int i = 0; i < frame.size(); i++) {
+        for (int j = 0; j < frame[i].size(); j++) {
+            ret_frame[i][j] = frame[i][j];
+        }
+    }
+    return ret_frame;
+}
+
+Frame::Frame(Shape_t shape, double fps, char default_char) : shape_(shape), fps_(fps), default_char_(default_char) {
 #ifndef _WIN32
     initscr();
     curs_set(0);
@@ -156,8 +167,12 @@ Frame_t Frame::makeFrame(std::string_view str) const {
     return sk::graphic::terminal::makeFrame(this->shape_, str);
 }
 
+Frame_t Frame::makeFrame(Const_Str_Frame_t frame) const {
+    return sk::graphic::terminal::makeFrame(this->shape_, frame);
+}
+
 void Frame::sleep() const {
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000 / this->fps_));
+    std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<long>(1000 / this->fps_)));
 }
 
 Const_Shape_t Frame::shape() const {
